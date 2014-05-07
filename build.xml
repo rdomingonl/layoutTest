@@ -1,0 +1,72 @@
+<project name="layoutTest" basedir="." default="gwt debug + run-codeserver">
+
+	<target name="Input test">
+		<input addproperty="choice1" defaultvalue="0" message="Gewenste actie" validargs="Compile, Deploy, Release" />
+		<echo message="You input: ${choice1}" />
+
+		<input addproperty="choice2" defaultvalue="onbekend" message="Tag:" />
+		<echo message="You input: ${choice2}" />
+	</target>
+
+	<target name="gwt debug + run-codeserver" description="Start gwt backend in debug mode and run the gwt frontend using the superdev codeserver" depends="checkMavenHomeIsSet">
+		<parallel>
+			<antcall target="gwt:debug" />
+			<antcall target="gwt:run-codeserver" />
+		</parallel>
+	</target>
+
+	<target name="gwt:debug" description="Debug gwt project (no suspend)" depends="checkMavenHomeIsSet" if="MAVEN_HOME">
+		<apply executable="${MAVEN_HOME}/bin/mvn">
+			<arg value="gwt:debug" />
+			<arg value="-Dgwt.debugSuspend=false" />
+			<arg value="-f" />
+			<fileset dir=".">
+				<patternset>
+					<include name="pom.xml" />
+				</patternset>
+			</fileset>
+		</apply>
+	</target>
+
+	<target name="gwt:debug_suspend" description="Debug gwt project (suspend), start app after remotedebugger is connected" depends="checkMavenHomeIsSet" if="MAVEN_HOME">
+		<apply executable="${MAVEN_HOME}/bin/mvn">
+			<arg value="gwt:debug" />
+			<arg value="-f" />
+			<fileset dir=".">
+				<patternset>
+					<include name="pom.xml" />
+				</patternset>
+			</fileset>
+		</apply>
+	</target>
+
+	<target name="gwt:run" description="Run gwt backend (no debug mode)" depends="checkMavenHomeIsSet">
+		<apply executable="${MAVEN_HOME}/bin/mvn">
+			<arg value="gwt:run" />
+			<arg value="-f" />
+			<fileset dir=".">
+				<patternset>
+					<include name="pom.xml" />
+				</patternset>
+			</fileset>
+		</apply>
+	</target>
+
+	<target name="gwt:run-codeserver" description="Run gwt frontend using the superdev codeserver" depends="checkMavenHomeIsSet" if="MAVEN_HOME">
+		<apply executable="${MAVEN_HOME}/bin/mvn">
+			<arg value="gwt:run-codeserver" />
+			<arg value="-f" />
+			<fileset dir=".">
+				<patternset>
+					<include name="pom.xml" />
+				</patternset>
+			</fileset>
+		</apply>
+	</target>
+
+	<target name="checkMavenHomeIsSet" unless="MAVEN_HOME">
+		<echo message="Please configure your MAVEN_HOME" />
+	</target>
+
+
+</project>
