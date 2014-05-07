@@ -142,7 +142,7 @@
           <!-- Ask GWT to create the Story of Your Compile (SOYC) (gwt:compile) -->
           <compileReport>true</compileReport>
           <module>nl.tc.rd.exp.layouttest.LayoutTest</module>
-          <logLevel>ALL</logLevel>
+          <logLevel>INFO</logLevel>
           <style>${gwt.style}</style>
           <copyWebapp>true</copyWebapp>
  <systemProperties>

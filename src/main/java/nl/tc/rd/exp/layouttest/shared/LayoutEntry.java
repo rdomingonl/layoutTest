@@ -1,6 +1,7 @@
 package nl.tc.rd.exp.layouttest.shared;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ public class LayoutEntry {
     private boolean allowsMultipleChildren = false;
     private List<LayoutEntry> children = new ArrayList<LayoutEntry>();
     private LayoutEntry parent;
+    private HashMap<String, String> data = new HashMap<String, String>();
 
     public LayoutEntry(LayoutEntry parent) {
         this.parent = parent;
@@ -65,5 +67,15 @@ public class LayoutEntry {
     public void setParent(LayoutEntry parent) {
         this.parent = parent;
     }
+
+	public HashMap<String, String> getData() {
+		return data;
+	}
+
+	public void setData(HashMap<String, String> data) {
+		this.data = data;
+	}
+    
+    
 
 }
