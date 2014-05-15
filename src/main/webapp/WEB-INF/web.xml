@@ -4,7 +4,7 @@
 
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>LayoutTest.html</welcome-file>
+    <welcome-file>Application.html</welcome-file>
   </welcome-file-list>
 
 </web-app>

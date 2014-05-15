@@ -5,5 +5,5 @@ import com.google.gwt.event.shared.EventHandler;
 /**
  * Handler of lifecycleevents
  */
-public interface ValidationViewEventHandler extends EventHandler {
+public interface ApplicationViewEventHandler extends EventHandler {
 }

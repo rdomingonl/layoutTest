@@ -5,7 +5,7 @@
  *
  * http://www.sencha.com/products/gxt/license/
  */
-package nl.tc.rd.exp.layouttest.shared;
+package nl.tc.rd.exp.layouttest.client.buildingblock.flowlayoutcontainer;
 
 import com.google.gwt.editor.client.Editor.Path;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -13,9 +13,9 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
 
-public interface LayoutEntryProperties extends PropertyAccess<LayoutEntry> {
+public interface FlowLayoutContainerBBProperties extends PropertyAccess<FlowLayoutContainerBB> {
     @Path("key")
-    ModelKeyProvider<LayoutEntry> key();
+    ModelKeyProvider<FlowLayoutContainerBB> key();
 
-    ValueProvider<LayoutEntry, String> name();
+    ValueProvider<FlowLayoutContainerBB, String> name();
 }

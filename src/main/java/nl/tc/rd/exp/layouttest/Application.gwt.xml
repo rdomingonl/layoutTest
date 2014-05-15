@@ -12,7 +12,7 @@
 <!-- implied. License for the specific language governing permissions and   -->
 <!-- limitations under the License.                                         -->
 
-<module rename-to='layouttest'>
+<module rename-to="application">
 
   <inherits name='com.google.gwt.user.User' />
   <inherits name='com.google.gwt.user.RemoteService' />
@@ -27,7 +27,7 @@
   <!-- GXT Stylesheet -->
  <stylesheet src="reset.css" />
 
-  <entry-point class='nl.tc.rd.exp.layouttest.client.LayoutTest' />
+  <entry-point class='nl.tc.rd.exp.layouttest.client.Application' />
 
   <source path='client' />
   <source path='shared' />

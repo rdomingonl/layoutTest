@@ -8,8 +8,8 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author raymond
  * 
  */
-public class ValidationViewEvent extends GwtEvent<ValidationViewEventHandler> {
-    public static final Type<ValidationViewEventHandler> TYPE = new Type<ValidationViewEventHandler>();
+public class ApplicationViewEvent extends GwtEvent<ApplicationViewEventHandler> {
+    public static final Type<ApplicationViewEventHandler> TYPE = new Type<ApplicationViewEventHandler>();
 
     /**
      * Action enum
@@ -20,19 +20,19 @@ public class ValidationViewEvent extends GwtEvent<ValidationViewEventHandler> {
 
     private ACTION action;
 
-    public ValidationViewEvent(ACTION action) {
+    public ApplicationViewEvent(ACTION action) {
         this.action = action;
     }
 
     @Override
-    protected void dispatch(ValidationViewEventHandler handler) {
+    protected void dispatch(ApplicationViewEventHandler handler) {
         // if (action == ACTION.SEND) {
         // handler.onSend(this);
         // }
     }
 
     @Override
-    public com.google.gwt.event.shared.GwtEvent.Type<ValidationViewEventHandler> getAssociatedType() {
+    public com.google.gwt.event.shared.GwtEvent.Type<ApplicationViewEventHandler> getAssociatedType() {
         return TYPE;
     }
 }
