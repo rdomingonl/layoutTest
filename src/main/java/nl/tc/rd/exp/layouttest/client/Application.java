@@ -1,7 +1,11 @@
 package nl.tc.rd.exp.layouttest.client;
 
-import nl.tc.rd.exp.layouttest.client.mvp.presenter.PageDesignerPresenter;
-import nl.tc.rd.exp.layouttest.client.mvp.view.PageDesignerView;
+import nl.tc.rd.exp.layouttest.client.buildingblock.flowlayoutcontainer.FlowLayoutContainerBB;
+import nl.tc.rd.exp.layouttest.client.event.BuildingBlockLifeCycleEvent;
+import nl.tc.rd.exp.layouttest.client.mvp.presenter.WidgetDesignerPresenter;
+import nl.tc.rd.exp.layouttest.client.mvp.view.WidgetDesignerView;
+import nl.tc.rd.exp.layouttest.shared.buildingblock.BuildingBlock;
+import nl.tc.rd.exp.layouttest.shared.buildingblock.BuildingBlockBase;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.shared.EventBus;
@@ -13,31 +17,31 @@ import com.sencha.gxt.widget.core.client.container.Viewport;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Application implements EntryPoint {
+	EventBus globalEventBus = new SimpleEventBus();
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		EventBus globalEventBus = new SimpleEventBus();
 
 		// create views
-		PageDesignerView view = new PageDesignerView(globalEventBus);
+		WidgetDesignerView view = new WidgetDesignerView(globalEventBus);
 
 		// create presenters
-		PageDesignerPresenter presenter = new PageDesignerPresenter(
+		WidgetDesignerPresenter presenter = new WidgetDesignerPresenter(
 		        globalEventBus, view);
-
-		// use all available space for first container
+		
+		// add root view to RootPanel
 		Viewport vp = new Viewport();
-//		vp.setWidget(new TextButton("Foo1234"));
 		vp.setWidget(view);
 		RootPanel.get().add(vp);
-
-		// GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-		// public void onUncaughtException(Throwable e) {
-		// Window.alert("Error: " + e.getMessage());
-		// e.printStackTrace();
-		// com.google.gwt.core.shared.GWT.log(e.getMessage(), e);
-		// }
-		// });
+		
+		// register buildingblocks
+		registerBuildingBlock(new FlowLayoutContainerBB());
+		
 	}
+
+	private void registerBuildingBlock(
+            BuildingBlock bb) {
+		globalEventBus.fireEvent(new BuildingBlockLifeCycleEvent(bb, BuildingBlockLifeCycleEvent.Action.REGISTER));
+    }
 }

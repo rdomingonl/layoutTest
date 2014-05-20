@@ -1,25 +1,26 @@
-package nl.tc.rd.exp.layouttest.shared.buildingblock.common;
+package nl.tc.rd.exp.layouttest.shared.buildingblock;
 
 
 /**
  * @author raymond
  * 
  */
-public abstract class BuildingBlockBase implements BuildingBlock{
+public abstract class BuildingBlockBase implements BuildingBlock {
 	
     private String identifier;
     private String name;
     
     public BuildingBlockBase() {
-    	
+    	super();
     }
     
     public BuildingBlockBase(String identifier, String name) {
+    	this();
     	this.name=name;
     	this.identifier = identifier;
     }
 
-    public String getIdentifier() {
+    public String getBuildingBlockID() {
         return identifier;
     }
 
@@ -27,7 +28,7 @@ public abstract class BuildingBlockBase implements BuildingBlock{
         this.identifier = identifier;
     }
 
-    public String getName() {
+    public String getBuildingBlockName() {
         return name;
     }
 
