@@ -24,7 +24,7 @@ public abstract class BuildingBlockBase implements BuildingBlock {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
+    public void setBuildingBlockID(String identifier) {
         this.identifier = identifier;
     }
 
@@ -32,7 +32,7 @@ public abstract class BuildingBlockBase implements BuildingBlock {
         return name;
     }
 
-    public void setName(String name) {
+    public void setBuildingBlockName(String name) {
         this.name = name;
     }
 

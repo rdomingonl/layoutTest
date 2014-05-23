@@ -19,6 +19,7 @@ public class WidgetDesignerPresenter implements WidgetDesignerViewEventHandler, 
 
     public interface Display {
     	public BuildingBlock getSelectedBuildingBlock();
+    	public void addBuldingBlock(BuildingBlock bb);
     }
 
     public WidgetDesignerPresenter(EventBus globalEventBus, final WidgetDesignerView view) {
@@ -31,6 +32,7 @@ public class WidgetDesignerPresenter implements WidgetDesignerViewEventHandler, 
 
 	@Override
     public void onInsertBuildingBlock(BuildingBlock bb) {
+		view.addBuldingBlock(bb);
     }
 
 	@Override

@@ -7,7 +7,7 @@ import java.util.List;
  * @author raymond
  * 
  */
-public class BuildingBlockContainerBase extends BuildingBlockBase implements
+public abstract class BuildingBlockContainerBase extends BuildingBlockBase implements
         BuildingBlockContainer {
 
 	private List<BuildingBlock> children = new ArrayList<BuildingBlock>();
@@ -22,6 +22,11 @@ public class BuildingBlockContainerBase extends BuildingBlockBase implements
 	@Override
 	public BuildingBlock getBuildingBlockParent() {
 		return parent;
+	}
+	
+	@Override
+	public void setBuildingBlockParent(BuildingBlock bb) {
+		this.parent = bb;
 	}
 
 	@Override

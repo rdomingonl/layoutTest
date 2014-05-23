@@ -20,8 +20,7 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.Dialog;
-import com.sencha.gxt.widget.core.client.box.MessageBox;
+import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
@@ -29,6 +28,8 @@ import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent.SelectionChangedHandler;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 
 /**
@@ -42,6 +43,9 @@ public class WidgetDesignerView extends SimpleContainer implements
 	Tree<BuildingBlock, String> buildingBlockTree;
 	TreeStore<BuildingBlock> buildingBlockStore;
 	BuildingBlock rootBuildingBlock = new RootContainerBB();
+
+	ContentPanel previewPanel = new ContentPanel();
+	TabPanel widgetPropertiesTabPanel = new TabPanel();
 
 	Menu contextMenu = new Menu();
 	MenuItem insertMenu = new MenuItem();
@@ -71,14 +75,14 @@ public class WidgetDesignerView extends SimpleContainer implements
 			        @Override
 			        public void setValue(BuildingBlock buildingBlock,
 			                String value) {
+
 			        }
 
 			        @Override
 			        public String getPath() {
-				        return "name";
+				        return "buildingBlockName";
 			        }
 		        });
-		// buildingBlockTree.setWidth(300);
 		SimpleSafeHtmlCell<String> cell = new SimpleSafeHtmlCell<String>(
 		        SimpleSafeHtmlRenderer.getInstance(), "click") {
 
@@ -88,29 +92,30 @@ public class WidgetDesignerView extends SimpleContainer implements
 			        NativeEvent event, ValueUpdater<String> valueUpdater) {
 				super.onBrowserEvent(context, parent, value, event,
 				        valueUpdater);
-
-				BuildingBlock selection = buildingBlockTree.getSelectionModel()
-				        .getSelectedItem();
-
-				// insert
-				if (selection instanceof BuildingBlockContainer) {
-					BuildingBlockContainer bbc = (BuildingBlockContainer) selection;
-					insertMenu.setEnabled(bbc.isInsertSupported()
-					        || !bbc.hasChildren());
-				} else {
-					// no container selected, can't insert
-					insertMenu.setEnabled(false);
-				}
-
-				// edit
-				editMenu.setEnabled(!(selection instanceof RootContainerBB));
-
-				// delete
-				deleteMenu.setEnabled(!(selection instanceof RootContainerBB));
 			}
-
 		};
 		buildingBlockTree.setCell(cell);
+
+		buildingBlockTree.getSelectionModel().addSelectionChangedHandler(
+		        new SelectionChangedHandler<BuildingBlock>() {
+			        @Override
+			        public void onSelectionChanged(
+			                SelectionChangedEvent<BuildingBlock> event) {
+				        updateContextMenu();
+
+				        while (widgetPropertiesTabPanel.getWidgetCount() > 0) {
+					        widgetPropertiesTabPanel.remove(0);
+				        }
+
+				        BuildingBlock selectedBuildingBlock = getSelectedBuildingBlock();
+				        if (selectedBuildingBlock instanceof BuildingBlockContainer) {
+					        BuildingBlockContainer bbc = (BuildingBlockContainer) selectedBuildingBlock;
+					        ContentPanel layoutContainerProperties = new ContentPanel();
+					        widgetPropertiesTabPanel.add(
+					                bbc.getPropertiesWidget(), "Properties");
+				        }
+			        }
+		        });
 
 		// buildingBlockTree context menu
 		buildingBlockTree.setContextMenu(contextMenu);
@@ -119,13 +124,6 @@ public class WidgetDesignerView extends SimpleContainer implements
 		insertMenu.setSubMenu(insertSubMenu);
 
 		contextMenu.add(insertMenu);
-		insertMenu.addSelectionHandler(new SelectionHandler<Item>() {
-			@Override
-			public void onSelection(SelectionEvent<Item> event) {
-				globalEventBus.fireEvent(new WidgetDesignerViewEvent(
-				        WidgetDesignerViewEvent.Action.INSERT));
-			}
-		});
 
 		editMenu.setText("Edit");
 		contextMenu.add(editMenu);
@@ -133,7 +131,8 @@ public class WidgetDesignerView extends SimpleContainer implements
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				globalEventBus.fireEvent(new WidgetDesignerViewEvent(
-				        WidgetDesignerViewEvent.Action.EDIT));
+				        WidgetDesignerViewEvent.Action.EDIT,
+				        getSelectedBuildingBlock()));
 			}
 		});
 
@@ -143,13 +142,39 @@ public class WidgetDesignerView extends SimpleContainer implements
 			@Override
 			public void onSelection(SelectionEvent<Item> event) {
 				globalEventBus.fireEvent(new WidgetDesignerViewEvent(
-				        WidgetDesignerViewEvent.Action.DELETE));
+				        WidgetDesignerViewEvent.Action.DELETE,
+				        getSelectedBuildingBlock()));
 			}
 		});
 
 		// layout
-		ContentPanel cp = new ContentPanel();
-		cp.setWidget(buildingBlockTree);
+		ContentPanel leftOuterContentPanel = new ContentPanel();
+
+		BorderLayoutContainer leftBlc = new BorderLayoutContainer();
+
+		ContentPanel cpTree = new ContentPanel();
+		cpTree.setHeaderVisible(false);
+		cpTree.setWidget(buildingBlockTree);
+
+		BorderLayoutData leftBlcData1 = new BorderLayoutData();
+		leftBlcData1.setMargins(new Margins(8));
+		leftBlcData1.setCollapsible(false);
+		leftBlcData1.setSplit(true);
+		leftBlc.setCenterWidget(cpTree, leftBlcData1);
+
+		ContentPanel propertiesTabCP = new ContentPanel();
+		propertiesTabCP.setHeaderVisible(false);
+		BorderLayoutData leftBlcData2 = new BorderLayoutData();
+		leftBlcData2.setMargins(new Margins(8));
+		leftBlcData2.setCollapsible(true);
+		leftBlcData2.setSplit(true);
+		leftBlcData2.setCollapseMini(true);
+		leftBlcData2.setSize(250);
+		leftBlc.setSouthWidget(propertiesTabCP, leftBlcData2);
+
+		// widgetPropertiesTabPanel.add(new HTML("Foo1"),"foo1");
+		propertiesTabCP.setWidget(widgetPropertiesTabPanel);
+		leftOuterContentPanel.setWidget(leftBlc);
 
 		BorderLayoutContainer blc = new BorderLayoutContainer();
 		BorderLayoutData westData = new BorderLayoutData(0.2);
@@ -157,16 +182,38 @@ public class WidgetDesignerView extends SimpleContainer implements
 		westData.setCollapsible(true);
 		westData.setMinSize(200);
 		westData.setSplit(true);
-		blc.setWestWidget(cp, westData);
+		blc.setWestWidget(leftOuterContentPanel, westData);
 
 		BorderLayoutData centerData = new BorderLayoutData();
 		centerData.setMargins(new Margins(8));
 		centerData.setCollapsible(false);
 		centerData.setSplit(true);
-		blc.setCenterWidget(new ContentPanel(), centerData);
+		blc.setCenterWidget(previewPanel, centerData);
 
+		previewPanel.setWidget(rootBuildingBlock.getWidget());
 		// add flow panel
 		setWidget(blc);
+	}
+
+	private void updateContextMenu() {
+		BuildingBlock selection = buildingBlockTree.getSelectionModel()
+		        .getSelectedItem();
+
+		// insert
+		if (selection instanceof BuildingBlockContainer) {
+			BuildingBlockContainer bbc = (BuildingBlockContainer) selection;
+			insertMenu
+			        .setEnabled(bbc.isInsertSupported() || !bbc.hasChildren());
+		} else {
+			// no container selected, can't insert
+			insertMenu.setEnabled(false);
+		}
+
+		// edit
+		editMenu.setEnabled(!(selection instanceof RootContainerBB));
+
+		// delete
+		deleteMenu.setEnabled(!(selection instanceof RootContainerBB));
 	}
 
 	class BuildingBlockIdentityProvider implements
@@ -178,18 +225,37 @@ public class WidgetDesignerView extends SimpleContainer implements
 
 	}
 
-	private void mergeContextMenu(Menu bbContextMenu) {
-		int wCount = bbContextMenu.getWidgetCount();
-	}
-
 	@Override
-	public void onBuildingBlockRegistration(BuildingBlock bb) {
+	public void onBuildingBlockRegistration(final BuildingBlock bb) {
 		MenuItem insertMi = new MenuItem(bb.getBuildingBlockName());
+		insertMi.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				BuildingBlock parent = getSelectedBuildingBlock();
+				BuildingBlock newBB = bb.createNewInstance();
+				newBB.setBuildingBlockParent(parent);
+
+				globalEventBus.fireEvent(new WidgetDesignerViewEvent(
+				        WidgetDesignerViewEvent.Action.INSERT, newBB));
+
+				updateContextMenu();
+			}
+		});
+
 		insertSubMenu.add(insertMi);
-    }
+	}
 
 	@Override
 	public BuildingBlock getSelectedBuildingBlock() {
 		return buildingBlockTree.getSelectionModel().getSelectedItem();
+	}
+
+	@Override
+	public void addBuldingBlock(BuildingBlock bb) {
+		Info.display("addBuldingBlock", "addBuldingBlock:" + bb);
+		BuildingBlockContainer bbParentContainer = (BuildingBlockContainer) bb
+		        .getBuildingBlockParent();
+		bbParentContainer.addChild(bb);
+		buildingBlockStore.add(bb.getBuildingBlockParent(), bb);
 	}
 }
