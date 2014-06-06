@@ -1,72 +1,178 @@
+<!DOCTYPE project>
 <project name="layoutTest" basedir="." default="gwt debug + run-codeserver">
 
-	<target name="Input test">
-		<input addproperty="choice1" defaultvalue="0" message="Gewenste actie" validargs="Compile, Deploy, Release" />
-		<echo message="You input: ${choice1}" />
+    <target name="gwt debug + run-codeserver" description="Start gwt backend in debug mode and run the gwt frontend using the superdev codeserver"
+        depends="checkConfiguration">
+        <delete file="target/run-codeserver.log" failonerror="false" />
+        <parallel>
+            <antcall target="gwt:run-codeserver" />
+            <sequential>
+                <waitfor maxwait="300" maxwaitunit="second" timeoutproperty="logfileFlag">
+                    <available file="target/run-codeserver.log" />
+                </waitfor>
+                <antcall target="gwt:debug" />
+            </sequential>
+        </parallel>
+    </target>
 
-		<input addproperty="choice2" defaultvalue="onbekend" message="Tag:" />
-		<echo message="You input: ${choice2}" />
-	</target>
+    <target name="gwt:debug" description="Debug gwt project (no suspend)" depends="checkConfiguration, prepareSymbolMapAndRpcFiles"
+        if="MAVEN_HOME">
+        <apply executable="\${MAVEN_HOME}/bin/${mvnExecutable}">
+            <arg value="gwt:debug" />
+            <arg value="-P !addLog4jDependency" />
+            <arg value="-Dgwt.debugSuspend=false" />
+            <arg value="-Dtelecats.config_directory=\${telecats.config_directory}" />
+            <arg value="-Dtelecats.log_directory=\${telecats.log_directory}" />
+            <arg value="-f" />
+            <fileset dir=".">
+                <patternset>
+                    <include name="pom.xml" />
+                </patternset>
+            </fileset>
+        </apply>
+    </target>
 
-	<target name="gwt debug + run-codeserver" description="Start gwt backend in debug mode and run the gwt frontend using the superdev codeserver" depends="checkMavenHomeIsSet">
-		<parallel>
-			<antcall target="gwt:debug" />
-			<antcall target="gwt:run-codeserver" />
-		</parallel>
-	</target>
+    <target name="gwt:debug_suspend" description="Debug gwt project (suspend), start app after remotedebugger is connected"
+        depends="checkConfiguration, prepareSymbolMapAndRpcFiles" if="MAVEN_HOME">
+        <apply executable="\${MAVEN_HOME}/bin/${mvnExecutable}">
+            <arg value="gwt:debug" />
+            <arg value="-P !addLog4jDependency" />
+            <arg value="-Dtelecats.config_directory=\${telecats.config_directory}" />
+            <arg value="-Dtelecats.log_directory=\${telecats.log_directory}" />
+            <arg value="-f" />
+            <fileset dir=".">
+                <patternset>
+                    <include name="pom.xml" />
+                </patternset>
+            </fileset>
+        </apply>
+    </target>
 
-	<target name="gwt:debug" description="Debug gwt project (no suspend)" depends="checkMavenHomeIsSet" if="MAVEN_HOME">
-		<apply executable="${MAVEN_HOME}/bin/mvn">
-			<arg value="gwt:debug" />
-			<arg value="-Dgwt.debugSuspend=false" />
-			<arg value="-f" />
-			<fileset dir=".">
-				<patternset>
-					<include name="pom.xml" />
-				</patternset>
-			</fileset>
-		</apply>
-	</target>
+    <target name="gwt:run" description="Run gwt backend (no debug mode)" depends="checkConfiguration, prepareSymbolMapAndRpcFiles"
+        if="MAVEN_HOME">
+        <apply executable="\${MAVEN_HOME}/bin/${mvnExecutable}">
+            <arg value="gwt:run" />
+            <arg value="-P !addLog4jDependency" />
+            <arg value="-f" />
+            <fileset dir=".">
+                <patternset>
+                    <include name="pom.xml" />
+                </patternset>
+            </fileset>
+        </apply>
+    </target>
 
-	<target name="gwt:debug_suspend" description="Debug gwt project (suspend), start app after remotedebugger is connected" depends="checkMavenHomeIsSet" if="MAVEN_HOME">
-		<apply executable="${MAVEN_HOME}/bin/mvn">
-			<arg value="gwt:debug" />
-			<arg value="-f" />
-			<fileset dir=".">
-				<patternset>
-					<include name="pom.xml" />
-				</patternset>
-			</fileset>
-		</apply>
-	</target>
+    <target name="gwt:run-codeserver" description="Run gwt frontend using the superdev codeserver" depends="checkConfiguration"
+        if="MAVEN_HOME">
+        <delete file="target/run-codeserver.log" failonerror="false" />
+        <mkdir dir="target" />
+        <apply executable="\${MAVEN_HOME}/bin/${mvnExecutable}">
+            <arg value="gwt:run-codeserver" />
+            <arg value="-f" />
+            <fileset dir=".">
+                <patternset>
+                    <include name="pom.xml" />
+                </patternset>
+            </fileset>
+            <redirector alwayslog="true" output="target/run-codeserver.log">
+            </redirector>
+        </apply>
+    </target>
 
-	<target name="gwt:run" description="Run gwt backend (no debug mode)" depends="checkMavenHomeIsSet">
-		<apply executable="${MAVEN_HOME}/bin/mvn">
-			<arg value="gwt:run" />
-			<arg value="-f" />
-			<fileset dir=".">
-				<patternset>
-					<include name="pom.xml" />
-				</patternset>
-			</fileset>
-		</apply>
-	</target>
+    <target name="clean" description="Clean project" depends="checkMaven" if="MAVEN_HOME">
+        <apply executable="\${MAVEN_HOME}/bin/${mvnExecutable}">
+            <arg value="clean" />
+            <arg value="-f" />
+            <fileset dir=".">
+                <patternset>
+                    <include name="pom.xml" />
+                </patternset>
+            </fileset>
+        </apply>
+    </target>
 
-	<target name="gwt:run-codeserver" description="Run gwt frontend using the superdev codeserver" depends="checkMavenHomeIsSet" if="MAVEN_HOME">
-		<apply executable="${MAVEN_HOME}/bin/mvn">
-			<arg value="gwt:run-codeserver" />
-			<arg value="-f" />
-			<fileset dir=".">
-				<patternset>
-					<include name="pom.xml" />
-				</patternset>
-			</fileset>
-		</apply>
-	</target>
+    <!-- SYMBOL_MAPS SUPPORT -->
+    <target name="prepareSymbolMapAndRpcFiles" depends="prepareSymbolMapAndRpcFiles_waitForLinkingInformation">
+        <!-- find compiledFiles location -->
+        <loadfile srcfile="target/run-codeserver.log" property="compiledFilesLocation">
+            <filterchain>
+                <striplinebreaks />
+                <tokenfilter>
+                    <replaceregex pattern=".*Linking into (.*)application; Writing extras to.*" replace="\1"
+                        flags="s" />
+                </tokenfilter>
+            </filterchain>
+        </loadfile>
+        <echo message="Found compiledFilesLocation: [ ${compiledFilesLocation} ]" />
+        
+        <!-- prepare symbol maps -->
+        <mkdir dir="target/layoutTest-0.0.1-SNAPSHOT/WEB-INF/deploy" />
+        <copy toDir="target/layoutTest-0.0.1-SNAPSHOT/WEB-INF/deploy" verbose="true">
+            <fileset dir="${compiledFilesLocation}WEB-INF/deploy/">
+                <include name="application/symbolMaps/*"/>
+            </fileset>
+        </copy>
+        
+        <!-- prepare rpc serialization files -->
+        <copy toDir="target/layoutTest-0.0.1-SNAPSHOT/" verbose="true">
+            <fileset dir="${compiledFilesLocation}">
+                <include name="application/*rpc"/>
+            </fileset>
+        </copy>
+    </target>
 
-	<target name="checkMavenHomeIsSet" unless="MAVEN_HOME">
-		<echo message="Please configure your MAVEN_HOME" />
-	</target>
+    <!-- wait unitl Linking into line is logged -->
+    <target name="prepareSymbolMapAndRpcFiles_waitForLinkingInformation">
+        <echo
+            message="A proces is waiting for 'Linking' information to be logged to target/run-codeserver.log in order to access the symbolMaps, please run your codeserver when not already running..." />
+        <waitfor maxwait="300" maxwaitunit="second" timeoutproperty="timeoutFlag">
+            <resourcecontains resource="target/run-codeserver.log" substring="Linking into" />
+        </waitfor>
+        <echo
+            message="A proces is waiting for 'Linking' information to be logged to target/run-codeserver.log...done waiting, timeoutFlag (shouldn't be true): ${timeoutFlag}" />
+    </target>
 
+    <!-- CONFIGURATION -->
+    <target name="checkConfiguration" depends="checkMaven,checkTelecatsConfigDirectoryIsSet,checkTelecatsLogDirectoryIsSet"
+        unless="config_checked">
+        <property name="config_checked">true</property>
+        <echo message="--------------------[Settings]--------------------------" />
+        <echo message="MAVEN_HOME                : ${MAVEN_HOME}" />
+        <echo message="telecats.log_directory    : ${telecats.log_directory}" />
+        <echo message="telecats.config_directory : ${telecats.config_directory}" />
+        <echo message="--------------------------------------------------------" />
+    </target>
+
+    <target name="checkMaven" depends="checkMavenHomeIsSet,setMavenExecutable">
+    </target>
+
+    <target name="checkMavenHomeIsSet" unless="MAVEN_HOME">
+        <echo message="Please configure your MAVEN_HOME" />
+        <input addproperty="MAVEN_HOME" defaultvalue="/opt/maven" message="MAVEN_HOME:" />
+        <echo message="MAVEN_HOME: ${MAVEN_HOME}" />
+    </target>
+
+    <target name="setMavenExecutable" unless="mvnExecutable">
+        <condition property="mvnExecutable" value="mvn.bat">
+            <os family="windows" />
+        </condition>
+        <condition property="mvnExecutable" value="mvn">
+            <os family="unix" />
+        </condition>
+
+        <echo message="Mvn cmnd: ${mvnExecutable}" />
+    </target>
+
+    <target name="checkTelecatsConfigDirectoryIsSet" unless="telecats.config_directory">
+        <echo message="Please configure your telecats.config_directory" />
+        <input addproperty="telecats.config_directory" defaultvalue="src/main/config" message="telecats.config_directory:" />
+        <echo message="Telecats.config_directory: \${telecats.config_directory}" />
+    </target>
+
+    <target name="checkTelecatsLogDirectoryIsSet" unless="telecats.log_directory">
+        <echo message="Please configure your telecats.log_directory" />
+        <input addproperty="telecats.log_directory" defaultvalue="target" message="telecats.log_directory:" />
+        <echo message="Telecats.log_directory: \${telecats.log_directory}" />
+    </target>
 
 </project>

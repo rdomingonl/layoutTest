@@ -6,7 +6,7 @@
 	<groupId>nl.tc.rd.exp</groupId>
 	<artifactId>layout-test</artifactId>
 	<packaging>war</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>layoutTest</name>
 
 	<properties>
@@ -16,6 +16,7 @@
 		<!-- GWT needs at least java 1.6 -->
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
+        <log4j.version>1.2.6</log4j.version>
 
 		<!-- Don't let your Mac use a crazy non-standard encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -89,6 +90,12 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.6.1</version>
+			<exclusions>
+			    <exclusion>
+			        <artifactId>log4j</artifactId>
+			        <groupId>log4j</groupId>
+			    </exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -146,6 +153,8 @@
 					<copyWebapp>true</copyWebapp>
 					<systemProperties>
 						<gwt.codeserver.port>9876</gwt.codeserver.port>
+                        <debugPort>8001</debugPort>
+                        <port>8889</port>
 					</systemProperties>
 				</configuration>
 			</plugin>
@@ -191,4 +200,25 @@
 			</plugin>
 		</plugins>
 	</build>
+    
+    
+    <profiles>
+        <profile>
+            <!-- Workaround - part2 (see also part1 in global plugin section) -->
+            <!-- When running gwt development in mode log4j dependency shouldn't be there or there will be erros in log output. -->
+            <!-- This is why we have defined it in separate profile so we can disable it when running in gwt dev mode (gwt backend). -->
+            <!-- When you run gwt backend you should disable this profile using mvn -P !addLog4jDependency -->
+            <id>addLog4jDependency</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                    <version>${log4j.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
